@@ -1,2 +1,2 @@
 # abr-viewer
-Photoshop brushes (*.abr files) preview utility.s
+Photoshop brushes (*.abr files) preview utility.
