@@ -1,0 +1,8 @@
+﻿<Window x:Class="AbrViewer.BrushPreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ShowInTaskbar="False" 
+        SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" KeyDown="Window_KeyDown">
+    <Grid Margin="2">
+        <Image Source="{Binding}" Stretch="None" />
+    </Grid>
+</Window>
