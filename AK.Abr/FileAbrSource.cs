@@ -2,32 +2,24 @@
 
 namespace AK.Abr
 {
-	public class FileAbrSource : IAbrSource
-	{
-		private readonly string _abrFilePath;
+    public class FileAbrSource : IAbrSource
+    {
+        private readonly string _abrFilePath;
 
-		public FileAbrSource(string abrFilePath)
-		{
-			if (!File.Exists(abrFilePath))
-				throw new FileNotFoundException("Can't find brush file", abrFilePath);
+        public FileAbrSource(string abrFilePath) {
+            if (!File.Exists(abrFilePath))
+                throw new FileNotFoundException("Can't find brush file", abrFilePath);
 
-			_abrFilePath = abrFilePath;
-			Timestamp = File.GetLastWriteTime(_abrFilePath).Ticks;
-		}
+            _abrFilePath = abrFilePath;
+            Timestamp = File.GetLastWriteTime(_abrFilePath).Ticks;
+        }
 
-		public string Name
-		{
-			get { return _abrFilePath; }
-		}
+        public string Name => _abrFilePath;
 
-		public long Timestamp
-		{
-			get; private set;
-		}
+        public long Timestamp { get; }
 
-		public Stream OpenRead()
-		{
-			return File.OpenRead(_abrFilePath);
-		}
-	}
+        public Stream OpenRead() {
+            return File.OpenRead(_abrFilePath);
+        }
+    }
 }

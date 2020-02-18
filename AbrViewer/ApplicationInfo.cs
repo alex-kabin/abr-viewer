@@ -21,21 +21,17 @@ namespace AbrViewer
         /// <summary>
         /// Gets the product name of the application.
         /// </summary>
-        public static string ProductName
-        {
-            get
-            {
-                if (!productNameCached)
-                {
+        public static string ProductName {
+            get {
+                if (!productNameCached) {
                     Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                    {
-                        AssemblyProductAttribute attribute = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(
-                            entryAssembly, typeof(AssemblyProductAttribute)));
+                    if (entryAssembly != null) {
+                        AssemblyProductAttribute attribute = ((AssemblyProductAttribute) Attribute.GetCustomAttribute(
+                            entryAssembly, typeof(AssemblyProductAttribute)
+                        ));
                         productName = (attribute != null) ? attribute.Product : "";
                     }
-                    else
-                    {
+                    else {
                         productName = "";
                     }
                     productNameCached = true;
@@ -47,19 +43,14 @@ namespace AbrViewer
         /// <summary>
         /// Gets the version number of the application.
         /// </summary>
-        public static string Version
-        {
-            get
-            {
-                if (!versionCached)
-                {
+        public static string Version {
+            get {
+                if (!versionCached) {
                     Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                    {
+                    if (entryAssembly != null) {
                         version = entryAssembly.GetName().Version.ToString();
                     }
-                    else
-                    {
+                    else {
                         version = "";
                     }
                     versionCached = true;
@@ -71,21 +62,17 @@ namespace AbrViewer
         /// <summary>
         /// Gets the company of the application.
         /// </summary>
-        public static string Company
-        {
-            get
-            {
-                if (!companyCached)
-                {
+        public static string Company {
+            get {
+                if (!companyCached) {
                     Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                    {
-                        AssemblyCompanyAttribute attribute = ((AssemblyCompanyAttribute)Attribute.GetCustomAttribute(
-                            entryAssembly, typeof(AssemblyCompanyAttribute)));
+                    if (entryAssembly != null) {
+                        AssemblyCompanyAttribute attribute = ((AssemblyCompanyAttribute) Attribute.GetCustomAttribute(
+                            entryAssembly, typeof(AssemblyCompanyAttribute)
+                        ));
                         company = (attribute != null) ? attribute.Company : "";
                     }
-                    else
-                    {
+                    else {
                         company = "";
                     }
                     companyCached = true;
@@ -97,21 +84,18 @@ namespace AbrViewer
         /// <summary>
         /// Gets the copyright information of the application.
         /// </summary>
-        public static string Copyright
-        {
-            get
-            {
-                if (!copyrightCached)
-                {
+        public static string Copyright {
+            get {
+                if (!copyrightCached) {
                     Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                    {
-                        AssemblyCopyrightAttribute attribute = (AssemblyCopyrightAttribute)Attribute.GetCustomAttribute(
-                            entryAssembly, typeof(AssemblyCopyrightAttribute));
+                    if (entryAssembly != null) {
+                        AssemblyCopyrightAttribute attribute =
+                                (AssemblyCopyrightAttribute) Attribute.GetCustomAttribute(
+                                    entryAssembly, typeof(AssemblyCopyrightAttribute)
+                                );
                         copyright = attribute != null ? attribute.Copyright : "";
                     }
-                    else
-                    {
+                    else {
                         copyright = "";
                     }
                     copyrightCached = true;

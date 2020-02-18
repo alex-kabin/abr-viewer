@@ -10,18 +10,18 @@
     </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Файл">
-                <MenuItem Header="Открыть папку..." Command="{Binding OpenFolderCommand}" />
-                <MenuItem Header="Выход" Command="{Binding ExitCommand}" />
+            <MenuItem Header="File">
+                <MenuItem Header="Open folder..." Command="{Binding OpenFolderCommand}" />
+                <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
             </MenuItem>
-            <MenuItem Header="О программе" Command="{Binding AboutCommand}"></MenuItem>
+            <MenuItem Header="About" Command="{Binding AboutCommand}"></MenuItem>
         </Menu>
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem Margin="1" BorderBrush="LightGray" BorderThickness="1">
+            <StatusBarItem Margin="1" BorderBrush="LightGray" BorderThickness="1" Padding="6,0,6,0">
                 <TextBlock Text="{Binding CurrentFolder}" />
             </StatusBarItem>
-            <StatusBarItem Margin="1" BorderBrush="LightGray" BorderThickness="1">
-                <TextBlock  Text="{Binding StatusText}" />
+            <StatusBarItem Margin="1" BorderBrush="LightGray" BorderThickness="1" Padding="6,0,6,0">
+                <TextBlock Text="{Binding StatusText}" />
             </StatusBarItem>
         </StatusBar>
         <Grid Margin="2">
@@ -31,7 +31,7 @@
             </Grid.ColumnDefinitions>
             <DockPanel Margin="0,0,4,0">
                 <StackPanel DockPanel.Dock="Top">
-                    <Button Content="Открыть папку..." Command="{Binding OpenFolderCommand}" />
+                    <Button Content="Open folder..." Command="{Binding OpenFolderCommand}" />
                 </StackPanel>
                 <ListBox Margin="0,2,0,0" ItemsSource="{Binding BrushFiles}" SelectionMode="Single">
                     <ListBox.ItemTemplate>
@@ -44,11 +44,11 @@
             <GridSplitter Width="4" Grid.Column="0" />
             <DockPanel Grid.Column="1">
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="Размер кисти:"/>
+                    <TextBlock VerticalAlignment="Center" Text="Thumbnail size:"/>
                     <Slider Margin="6,0,0,0" VerticalAlignment="Center" x:Name="sizeSlider" Value="80" Minimum="60" Maximum="300" Width="200"  />
                     <TextBlock Margin="4,0,0,0" VerticalAlignment="Center" Text="{Binding ElementName=sizeSlider, Path=Value, StringFormat='{}{0:N0}px'}" />
                 </StackPanel>
-                <ListBox Margin="0,2,0,0" x:Name="imagesList" ItemsSource="{Binding BrushImages}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox Margin="0,2,0,0" x:Name="imageList" ItemsSource="{Binding BrushImages}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal"  />
@@ -69,7 +69,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                        <Border Margin="1" x:Name="border" BorderBrush="LightGray" BorderThickness="1">
+                                        <Border Margin="1" x:Name="border" BorderBrush="LightGray" Background="#FFFFF6" BorderThickness="1">
                                             <ContentPresenter />
                                         </Border>
                                         <ControlTemplate.Triggers>
@@ -83,7 +83,7 @@
                             <Setter Property="ContextMenu">
                                 <Setter.Value>
                                     <ContextMenu>
-                                        <MenuItem Header="Сохранить..." Command="{StaticResource SaveImageCommandRef}" CommandParameter="{Binding}" />
+                                        <MenuItem Header="Save..." Command="{StaticResource SaveImageCommandRef}" CommandParameter="{Binding}" />
                                     </ContextMenu>
                                 </Setter.Value>
                             </Setter>

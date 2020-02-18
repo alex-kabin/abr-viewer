@@ -18,199 +18,197 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace AbrViewer
 {
-	public class MainViewModel : ViewModelBase
-	{
-		private class AbrReadOperation
-		{
-			private readonly IAbrReader _reader;
-			private readonly MainViewModel _viewModel;
-			private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
+    public class MainViewModel : ViewModelBase
+    {
+        private class AbrReadOperation
+        {
+            private readonly IAbrReader _reader;
+            private readonly MainViewModel _viewModel;
+            private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
 
-			public AbrReadOperation(MainViewModel viewModel, IAbrSource source)
-			{
-				_viewModel = viewModel;
-				_reader = _viewModel._readerFactory.GetReader(source);
-				_reader.BrushImageReady += new System.EventHandler<BrushImageReadyEventArgs>(HandleBrushImageReady);
-				Start();
-			}
+            public AbrReadOperation(MainViewModel viewModel, IAbrSource source) {
+                _viewModel = viewModel;
 
-			private void Start()
-			{
-				_viewModel._images.Clear();
-				_reader
-					.ReadAsync(_cancellation.Token)
-					.ContinueWith(Finished, TaskScheduler.FromCurrentSynchronizationContext());
-				_viewModel.StatusText = "Загружаю кисти...";	
-			}
+                _reader = _viewModel._readerFactory.GetReader(source);
+                _reader.BrushImageReady += HandleBrushImageReady;
 
-			private void Finished(Task task)
-			{
-				_reader.BrushImageReady -= HandleBrushImageReady;
-				if (task.IsFaulted)
-				{
-					_viewModel.StatusText = "Ошибка";
-					MessageBox.Show(App.Current.MainWindow, task.Exception.InnerException.ToString(), "Ошибка", MessageBoxButton.OK,
-					                MessageBoxImage.Error);
-				}
-				else if (task.IsCompleted)
-					_viewModel.StatusText = "OK";
-			}
+                Start();
+            }
 
-			private void HandleBrushImageReady(object sender, BrushImageReadyEventArgs e)
-			{
-				if (_cancellation.IsCancellationRequested)
-					return;
-				
-				App.Current.Dispatcher.BeginInvoke(new Action(
-					() => _viewModel._images.Add(e.Bitmap)
-					));
-			}
-			
-			public void Cancel()
-			{
-				_cancellation.Cancel();
-			}
-		}
+            private void Start() {
+                _viewModel._images.Clear();
+                _reader.ReadAsync(_cancellation.Token)
+                       .ContinueWith(Finished, TaskScheduler.FromCurrentSynchronizationContext());
+                _viewModel.StatusText = "Loading brushes...";
+            }
 
-		private readonly IAbrReaderFactory _readerFactory;
-		
-		private AbrReadOperation _currentOperation;
-		private ObservableCollection<FileInfo> _files = new ObservableCollection<FileInfo>();
-		private ObservableCollection<BitmapSource> _images = new ObservableCollection<BitmapSource>();
-		
-		public MainViewModel(IAbrReaderFactory readerFactory)
-		{
-			_readerFactory = readerFactory;
-		
-			BrushFiles = new ListCollectionView(_files);
-			BrushFiles.CurrentChanged += new EventHandler(OnBrushFileSelected);
-			
-			BrushImages = new ListCollectionView(_images);
+            private void Finished(Task task) {
+                _reader.BrushImageReady -= HandleBrushImageReady;
+                if (task.IsFaulted) {
+                    _viewModel.StatusText = "Error";
+                    MessageBox.Show(App.Current.MainWindow, 
+                                    task.Exception?.InnerException?.ToString() ?? "Internal error", 
+                                    "Error",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error
+                    );
+                }
+                else if (task.IsCompleted) {
+                    _viewModel.StatusText = "OK";
+                }
+            }
 
-			OpenFolderCommand = new RelayCommand(OpenFolder);
-			ExitCommand = new RelayCommand(Exit);
-			SaveImageCommand = new RelayCommand<BitmapSource>(SaveImage);
-			AboutCommand = new RelayCommand(About);
-			PreviewCommand=  new RelayCommand<BitmapSource>(Preview);
+            private void HandleBrushImageReady(object sender, BrushImageReadyEventArgs e) {
+                if (_cancellation.IsCancellationRequested)
+                    return;
 
-			ProcessCommandLineArgs();
-		}
+                App.Current.Dispatcher.BeginInvoke(
+                    new Action(() => _viewModel._images.Add(e.Bitmap))
+                );
+            }
 
-		private void Preview(BitmapSource obj)
-		{
-			var previewWindow = new BrushPreviewWindow() { DataContext = obj, Owner = App.Current.MainWindow};
-			previewWindow.ShowDialog();
-		}
+            public void Cancel() {
+                _cancellation.Cancel();
+            }
+        }
 
-		private void About()
-		{
-			var aboutWindow = new AboutWindow() { Owner = App.Current.MainWindow, DataContext = new { ConfigInfo="Factory="+_readerFactory.ToString()} };
-			aboutWindow.ShowDialog();
-		}
+        private readonly IAbrReaderFactory _readerFactory;
 
-		private void SaveImage(BitmapSource bmp)
-		{
-			Microsoft.Win32.SaveFileDialog sfd = new Microsoft.Win32.SaveFileDialog() { Title = "Экспорт изображения кисти",Filter = "PNG|*.png", DefaultExt = "png" };
-			if (sfd.ShowDialog() == true)
-			{
-				var imageFilePath = sfd.FileName;
-				var encoder = new PngBitmapEncoder();
-				encoder.Frames.Add(BitmapFrame.Create(bmp));
-				using (var fs = File.OpenWrite(imageFilePath))
-					encoder.Save(fs);
-			}
-		}
+        private AbrReadOperation _currentOperation;
+        private ObservableCollection<FileInfo> _files = new ObservableCollection<FileInfo>();
+        private ObservableCollection<BitmapSource> _images = new ObservableCollection<BitmapSource>();
 
-		private void ProcessCommandLineArgs()
-		{
-			var args = Environment.GetCommandLineArgs();
-			if (args.Length > 1)
-			{
-				var dirOrFile = args[1];
-				if (Directory.Exists(dirOrFile))
-				{
-					ListFiles(dirOrFile);
-				}
-				else if (File.Exists(dirOrFile))
-				{
-					var dir = Path.GetDirectoryName(dirOrFile);
-					ListFiles(dir);
-					var fileName = Path.GetFileName(dirOrFile);
-					BrushFiles.MoveCurrentTo(_files.FirstOrDefault(f => f.Name == fileName));
-				}
-			}
-		}
+        public MainViewModel(IAbrReaderFactory readerFactory) {
+            _readerFactory = readerFactory;
 
-		private void Exit()
-		{
-			System.Windows.Application.Current.Shutdown();
-		}
+            BrushFiles = new ListCollectionView(_files);
+            BrushFiles.CurrentChanged += OnBrushFileSelected;
 
-		private void OnBrushFileSelected(object sender, EventArgs e)
-		{
-			var selectedFile = BrushFiles.CurrentItem as FileInfo;
-			if(selectedFile == null)
-				return;
+            BrushImages = new ListCollectionView(_images);
 
-			var source = new FileAbrSource(selectedFile.FullName);
+            OpenFolderCommand = new RelayCommand(OpenFolder);
+            ExitCommand = new RelayCommand(Exit);
+            SaveImageCommand = new RelayCommand<BitmapSource>(SaveImage);
+            AboutCommand = new RelayCommand(About);
+            PreviewCommand = new RelayCommand<BitmapSource>(Preview);
 
-			if(_currentOperation != null)
-				_currentOperation.Cancel();
+            ProcessCommandLineArgs();
+        }
 
-			_currentOperation = new AbrReadOperation(this, source);
-		}
+        private void Preview(BitmapSource obj) {
+            var previewWindow = new BrushPreviewWindow() {
+                DataContext = obj,
+                Owner = App.Current.MainWindow
+            };
+            previewWindow.ShowDialog();
+        }
 
-		private void OpenFolder()
-		{
-			var dialog = new FolderBrowserDialog() { ShowNewFolderButton = false, Description = "Выберите папку с файлами кистей", SelectedPath = CurrentFolder};
-			if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-			{
-				ListFiles(dialog.SelectedPath);
-			}
-		}
+        private void About() {
+            var aboutWindow = new AboutWindow() {
+                Owner = App.Current.MainWindow,
+                DataContext = new { ConfigInfo = "Factory=" + _readerFactory.ToString() }
+            };
+            aboutWindow.ShowDialog();
+        }
 
-		private void ListFiles(string folderPath)
-		{
-			_files.Clear();
-			
-			var directory = new DirectoryInfo(folderPath);
-			foreach (var brushFile in directory.EnumerateFiles("*.abr"))
-				_files.Add(brushFile);
+        private void SaveImage(BitmapSource bmp) {
+            Microsoft.Win32.SaveFileDialog sfd = new Microsoft.Win32.SaveFileDialog()
+                    { Title = "Brush image export", Filter = "PNG|*.png", DefaultExt = "png" };
+            if (sfd.ShowDialog() == true) {
+                var imageFilePath = sfd.FileName;
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bmp));
+                using (var fs = File.OpenWrite(imageFilePath))
+                    encoder.Save(fs);
+            }
+        }
 
-			StatusText = String.Format("Файлов: {0}", _files.Count);
-			CurrentFolder = directory.FullName;
-		}
+        private void ProcessCommandLineArgs() {
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length > 1) {
+                var dirOrFile = args[1];
+                if (Directory.Exists(dirOrFile)) {
+                    ListFiles(dirOrFile);
+                }
+                else if (File.Exists(dirOrFile)) {
+                    var dir = Path.GetDirectoryName(dirOrFile);
+                    ListFiles(dir);
+                    var fileName = Path.GetFileName(dirOrFile);
+                    BrushFiles.MoveCurrentTo(_files.FirstOrDefault(f => f.Name == fileName));
+                }
+            }
+        }
 
-		public ListCollectionView BrushFiles { get; private set; }
-		public ListCollectionView BrushImages { get; private set; }
+        private void Exit() {
+            System.Windows.Application.Current.Shutdown();
+        }
 
-		private string _statusText;
-		public string StatusText
-		{
-			get { return _statusText; }
-			set
-			{
-				_statusText = value;
-				RaisePropertyChanged("StatusText");
-			}
-		}
+        private void OnBrushFileSelected(object sender, EventArgs e) {
+            var selectedFile = BrushFiles.CurrentItem as FileInfo;
+            if (selectedFile == null)
+                return;
 
-		private string _currentFolder;
-		public string CurrentFolder
-		{
-			get { return _currentFolder; }
-			set { _currentFolder = value; RaisePropertyChanged("CurrentFolder");}
-		}
+            var source = new FileAbrSource(selectedFile.FullName);
 
-		public string Title
-		{
-			get { return ApplicationInfo.ProductName; }
-		}
+            _currentOperation?.Cancel();
 
-		public ICommand OpenFolderCommand { get; private set; }
-		public ICommand ExitCommand { get; private set; }
-		public ICommand SaveImageCommand { get; private set; }
-		public ICommand PreviewCommand { get; private set; }
-		public ICommand AboutCommand { get; private set; }
-	}
+            _currentOperation = new AbrReadOperation(this, source);
+        }
+
+        private void OpenFolder() {
+            var dialog = new FolderBrowserDialog() {
+                ShowNewFolderButton = false,
+                Description = "Choose folder with brushes",
+                SelectedPath = CurrentFolder
+            };
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                _images.Clear();
+                ListFiles(dialog.SelectedPath);
+            }
+        }
+
+        private void ListFiles(string folderPath) {
+            _files.Clear();
+
+            var directory = new DirectoryInfo(folderPath);
+            foreach (var brushFile in directory.EnumerateFiles("*.abr")) {
+                _files.Add(brushFile);
+            }
+
+            StatusText = $"Total files: {_files.Count}";
+            CurrentFolder = directory.FullName;
+        }
+
+        public ListCollectionView BrushFiles { get; }
+        public ListCollectionView BrushImages { get; }
+
+        private string _statusText;
+
+        public string StatusText {
+            get => _statusText;
+            set {
+                _statusText = value;
+                RaisePropertyChanged(nameof(StatusText));
+            }
+        }
+
+        private string _currentFolder;
+
+        public string CurrentFolder {
+            get => _currentFolder;
+            set {
+                _currentFolder = value;
+                RaisePropertyChanged(nameof(CurrentFolder));
+            }
+        }
+
+        public string Title => ApplicationInfo.ProductName;
+
+        public ICommand OpenFolderCommand { get; }
+        public ICommand ExitCommand { get; }
+        public ICommand SaveImageCommand { get; }
+        public ICommand PreviewCommand { get; }
+        public ICommand AboutCommand { get; }
+    }
 }

@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("AbrViewer")]
-[assembly: AssemblyCopyright("© 2012 AK")]
+[assembly: AssemblyCopyright("2012, AK")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
