@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace AbrViewer
+namespace AbrViewer.Support
 {
     /// <summary>
     /// This class provides information about the running application.

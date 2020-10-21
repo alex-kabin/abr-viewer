@@ -100,13 +100,13 @@ namespace AK.Abr
         }
 
         private int GetItemsCount() {
-            lock (_sync) {
-                return _cache.Keys.Select(key => _cache[key].Elements.Count).Sum();
-            }
+            return _cache.Keys.Select(key => _cache[key].Elements.Count).Sum();
         }
 
         public override string ToString() {
-            return $"MemoryCache ({GetItemsCount()}/{_capacity})";
+            lock (_sync) {
+                return $"MemoryCache ({_cache.Keys.Count}:{GetItemsCount()}/{_capacity})";
+            }
         }
         
         public void Dispose() {

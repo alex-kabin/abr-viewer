@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Windows;
-using Microsoft.Practices.Unity;
+using AbrViewer.Services;
+using AbrViewer.Support;
+using GalaSoft.MvvmLight.Threading;
 using Microsoft.Practices.Unity.Configuration;
+using Unity;
+using Unity.Lifetime;
 
 namespace AbrViewer
 {
@@ -13,23 +17,35 @@ namespace AbrViewer
     /// </summary>
     public partial class App : Application
     {
-        private UnityContainer _container;
+        private IUnityContainer _container;
+
+        private void InitializeContainer() {
+            _container = new UnityContainer()
+                         .EnableDiagnostic()
+                         .EnableLazy()
+                         .LoadConfiguration()
+                         .RegisterSingleton(typeof(IDialogService), typeof(DialogService))
+                         .RegisterSingleton(typeof(IRootWindow), typeof(MainWindow));
+            _container.BuildUp(this);
+        }
 
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
-
-            _container = new UnityContainer();
+            DispatcherHelper.Initialize();
             try {
-                _container.LoadConfiguration();
-                MainWindow = _container.Resolve<MainWindow>();
+                InitializeContainer();
             }
             catch (Exception ex) {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown();
                 return;
             }
-
             MainWindow?.Show();
+        }
+
+        [Dependency]
+        public IRootWindow RootWindow {
+            set => MainWindow = (Window)value;
         }
 
         protected override void OnExit(ExitEventArgs e) {

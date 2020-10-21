@@ -1,13 +1,22 @@
 ﻿<Window x:Class="AbrViewer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:AbrViewer"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:Command="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras.WPF4"
-        Title="{Binding Title}" Height="500" Width="700" WindowStartupLocation="CenterScreen">
+        xmlns:support="clr-namespace:AbrViewer.Support"
+        xmlns:behaviors="clr-namespace:AbrViewer.Behaviors"
+        Title="{Binding Title}" 
+        Height="{Binding Config.WindowHeight, Mode=TwoWay}" Width="{Binding Config.WindowWidth, Mode=TwoWay}" 
+        WindowState="{Binding Config.WindowState, Mode=TwoWay}"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <local:CommandReference x:Key="SaveImageCommandRef" Command="{Binding SaveImageCommand}" />
-        <local:CommandReference x:Key="PreviewCommandRef" Command="{Binding PreviewCommand}" />
+        <support:CommandReference x:Key="SaveImageCommandRef" Command="{Binding SaveImageCommand}" />
+        <support:CommandReference x:Key="PreviewCommandRef" Command="{Binding PreviewCommand}" />
+        <support:CommandReference x:Key="DeleteFileCommandRef" Command="{Binding DeleteFileCommand}" />
+        <support:CommandReference x:Key="EscapeCommandRef" Command="{Binding EscapeCommand}" />
     </Window.Resources>
+    <i:Interaction.Behaviors>
+        <behaviors:KeyCommandBehavior Key="Escape" Command="{StaticResource EscapeCommandRef}" />
+    </i:Interaction.Behaviors>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
@@ -34,6 +43,9 @@
                     <Button Content="Open folder..." Command="{Binding OpenFolderCommand}" />
                 </StackPanel>
                 <ListBox Margin="0,2,0,0" ItemsSource="{Binding BrushFiles}" SelectionMode="Single">
+                    <i:Interaction.Behaviors>
+                        <behaviors:KeyCommandBehavior Key="Delete" Command="{StaticResource DeleteFileCommandRef}" CommandParameter="{Binding BrushFiles.CurrentItem}" />
+                    </i:Interaction.Behaviors>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}" />
@@ -45,7 +57,7 @@
             <DockPanel Grid.Column="1">
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="Thumbnail size:"/>
-                    <Slider Margin="6,0,0,0" VerticalAlignment="Center" x:Name="sizeSlider" Value="80" Minimum="60" Maximum="300" Width="200"  />
+                    <Slider Margin="6,0,0,0" VerticalAlignment="Center" x:Name="sizeSlider" Value="{Binding Config.ThumbnailSize}" Minimum="60" Maximum="300" Width="200"  />
                     <TextBlock Margin="4,0,0,0" VerticalAlignment="Center" Text="{Binding ElementName=sizeSlider, Path=Value, StringFormat='{}{0:N0}px'}" />
                 </StackPanel>
                 <ListBox Margin="0,2,0,0" x:Name="imageList" ItemsSource="{Binding BrushImages}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -59,7 +71,7 @@
                             <Image Margin="1" Source="{Binding}" Height="{Binding ElementName=sizeSlider, Path=Value}" 
                                    Width="{Binding ElementName=sizeSlider, Path=Value}" Stretch="Uniform">
                                 <i:Interaction.Behaviors>
-                                    <local:DoubleClickCommandBehavior Command="{StaticResource PreviewCommandRef}" CommandParameter="{Binding}" />
+                                    <behaviors:DoubleClickCommandBehavior Command="{StaticResource PreviewCommandRef}" CommandParameter="{Binding}" />
                                 </i:Interaction.Behaviors>
                             </Image>
                         </DataTemplate>

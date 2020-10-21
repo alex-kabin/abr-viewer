@@ -1,21 +1,21 @@
 ﻿namespace AK.Abr
 {
-    public class CachedAbrReaderFactory : IAbrReaderFactory
+    public class CachingAbrReaderFactory : IAbrReaderFactory
     {
         private readonly IAbrReaderFactory _factory;
         private readonly IBitmapCache _cache;
 
-        public CachedAbrReaderFactory(IAbrReaderFactory factory, IBitmapCache cache) {
+        public CachingAbrReaderFactory(IAbrReaderFactory factory, IBitmapCache cache) {
             _factory = factory;
             _cache = cache;
         }
 
         public IAbrReader GetReader(IAbrSource source) {
-            return new CachedAbrReader(_factory.GetReader(source), _cache);
+            return new CachingAbrReader(_factory.GetReader(source), _cache);
         }
 
         public override string ToString() {
-            return $"CachedAbrReaderFactory [Cache={_cache.ToString()}]";
+            return $"CachingAbrReaderFactory [Cache={_cache.ToString()}]";
         }
     }
 }

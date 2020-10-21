@@ -6,14 +6,14 @@ using System.Windows.Media.Imaging;
 
 namespace AK.Abr
 {
-    public class CachedAbrReader : IAbrReader, IDisposable
+    public class CachingAbrReader : IAbrReader, IDisposable
     {
         private readonly IAbrReader _reader;
         private readonly IBitmapCache _cache;
 
         public IAbrSource Source => _reader.Source;
 
-        public CachedAbrReader(IAbrReader reader, IBitmapCache cache) {
+        public CachingAbrReader(IAbrReader reader, IBitmapCache cache) {
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
 
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));

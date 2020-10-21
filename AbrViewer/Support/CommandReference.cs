@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace AbrViewer
+namespace AbrViewer.Support
 {
 	public class CommandReference : Freezable, ICommand
 	{
